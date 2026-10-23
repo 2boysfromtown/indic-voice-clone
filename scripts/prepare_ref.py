@@ -44,13 +44,25 @@ subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(full), "-t", f"{cut:.3f
 full.unlink()
 print(f"reference clip: {wav} ({cut:.1f} s, cut at {'a pause' if good else 'the max length'})")
 
-code = ("import sys; from faster_whisper import WhisperModel; "
-        "m = WhisperModel('large-v3-turbo', device='cuda', compute_type='int8_float16'); "
-        "s, _ = m.transcribe(sys.argv[1], language=sys.argv[2]); "
-        "sys.stdout.reconfigure(encoding='utf-8'); print(' '.join(x.text.strip() for x in s))")
+# PyTorch already ships cublas, but faster-whisper's engine cannot see it on Windows until we say where it is.
+# If the GPU still fails, fall back to the CPU: slower, same words.
+code = ("import os, sys\n"
+        "try:\n"
+        "    import torch; os.add_dll_directory(os.path.join(os.path.dirname(torch.__file__), 'lib'))\n"
+        "except Exception:\n"
+        "    pass\n"
+        "from faster_whisper import WhisperModel\n"
+        "try:\n"
+        "    m = WhisperModel('large-v3-turbo', device='cuda', compute_type='int8_float16')\n"
+        "except Exception:\n"
+        "    m = WhisperModel('large-v3-turbo', device='cpu', compute_type='int8')\n"
+        "s, _ = m.transcribe(sys.argv[1], language=sys.argv[2])\n"
+        "sys.stdout.reconfigure(encoding='utf-8'); print(' '.join(x.text.strip() for x in s))\n")
 text = ""
 if WHISPER_PY.exists():
     r = subprocess.run([str(WHISPER_PY), "-c", code, str(wav), a.lang], capture_output=True, text=True, encoding="utf-8")
     text = r.stdout.strip()
+    if not text and r.stderr.strip():
+        print("whisper could not run:", r.stderr.strip().splitlines()[-1][:160])
 (refs / f"{a.name}.txt").write_text(text + "\n", encoding="utf-8")
 print(f"transcript -> refs/{a.name}.txt:\n  {text or '(empty: type the exact words you said)'}")
