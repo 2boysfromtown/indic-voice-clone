@@ -1,0 +1,19 @@
+# your voice stays on your PC
+recordings/*
+!recordings/.gitkeep
+refs/*
+!refs/.gitkeep
+out/*
+!out/.gitkeep
+
+# environments, models, caches
+python/
+chatterbox/
+indicf5/
+.uv-cache/
+.hf-cache/
+overrides-*.txt
+__pycache__/
+*.pyc
+.work/
+.env
