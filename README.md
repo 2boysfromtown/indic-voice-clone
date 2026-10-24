@@ -92,6 +92,15 @@ script text ──► speak.py ──► splits sentences ─┤
 - Whisper can't transcribe romanised Tanglish; write Tamil reference transcripts in Tamil script by hand.
 - Linux/macOS install script (the Python parts are cross-platform; PRs welcome).
 
+## Just want a ready-made voice? (optional)
+
+This project is about cloning *your own* voice, offline and free. If instead you only need a quick stock voice and don't mind a paid cloud API, two drop-in alternatives return a WAV you can use the same way:
+
+- [Sarvam AI](https://www.sarvam.ai) Bulbul: stock voices for Tamil, Hindi and other Indian languages.
+- [ElevenLabs](https://elevenlabs.io): stock and cloned voices across many languages.
+
+Both are suggestions, not part of the workflow here. The local models above need no key and no internet once installed.
+
 ## Responsible use
 
 Clone only your own voice, or someone who has agreed in writing. Chatterbox embeds Resemble AI's inaudible Perth watermark in its output.
